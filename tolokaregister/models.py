@@ -91,7 +91,7 @@ class UpdParticipant(Participant):
             return False
 
 
-class StatusEnum(str,Enum):
+class StatusEnum(str, Enum):
     unknown = 'UNKNOWN'
     submitted = 'SUBMITTED'
     accepted = 'ACCEPTED'
@@ -104,17 +104,13 @@ class TolokaParticipant(models.Model):
     """we don't need all these blank=true, only for debugging purposes so we can deal with this in admin"""
     owner = models.OneToOneField(to=UpdParticipant, on_delete=models.CASCADE,
                                  related_name='tolokaparticipant')
-    status = models.CharField(max_length=1000, default=StatusEnum.unknown.value)
+    status = models.CharField(max_length=1000, default=StatusEnum.unknown)
     """In info we write the whole response when we request the status"""
     info = models.TextField(null=True, blank=True)
     """The assginemnt is the only important thing here becuase it links otree and toloka together"""
     assignment = models.CharField(max_length=1000, unique=True)
     toloka_user_id = models.CharField(max_length=1000, null=True, blank=True)
     bonus_paid = models.BooleanField(null=True, blank=True)
-
-    answer_is_correct = models.BooleanField(null=True, blank=True)
-    answer = models.CharField(max_length=1000, null=True, blank=True)
-    bonus_is_calculated = models.BooleanField(null=True, blank=True)
     sandbox = models.BooleanField()
 
     def __str__(self):
@@ -122,35 +118,30 @@ class TolokaParticipant(models.Model):
 
     @property
     def payable(self):
-        return self.status == StatusEnum.accepted.value and not self.bonus_paid
+        return self.status == StatusEnum.accepted and not self.bonus_paid
 
     @property
     def acceptable(self):
         """Check if assignment can be accepted. Theoretically rejected assignmentes can be accepted, but we'll
         be naive and accept only submitted assignments - everything else can be dealt with in toloka interface"""
-        return self.status == StatusEnum.submitted.value
+        """Acceptability condition: under which condition we may accept the submission? In 
+        previous versions we checked against the code they returned, and that created a bunch of problems because 
+        they managed to type in the answer incorrectly. Right now, specifically in corrreg project I am only interested 
+        that they ve reached the stage where they can be paid. For the simplicity, I'll set somewhere the participant'var
+        'toloka_acceptable' to true.
+        """
+        acceptable = self.owner.vars.get('')
+        return self.status == StatusEnum.submitted
 
-    def update_info_from_toloka(self, resp):
-        """given a resp from toloka, udpate instance properties. It is far from optimal, but just a bit simpler"""
-        if not resp.get('error'):
-            self.status = resp.status
-            self.info = json.dumps(resp)
-            self.toloka_user_id = resp.user_id
-            if hasattr(resp, 'solutions') and isinstance(resp.solutions, list) and len(resp.solutions) > 0:
-                """If there are solutions then we keep an answer"""
-                self.answer = self.process_solutions(resp.solutions)
-                self.answer_is_correct = self.check_answer()
-        else:
-            self.status = StatusEnum.error.value
-            self.info = json.dumps(resp)
-        self.save()
+
+
 
     def accept_assignment(self):
         """check if status is Submitted. and iif yes - send accept request to toloka, return positive response back.
         otherwise sends error=True back. use sandbox param to get info.
         Theoretically rejected assignments can be (re-) accepted, but I dont' want to deal with this mess.
         """
-        if self.status == StatusEnum.submitted.value:
+        if self.acceptable:
             client = TolokaClient(self.sandbox)
             resp = client.accept_assignment(self.assignment)
             self.status = resp.status
@@ -159,56 +150,9 @@ class TolokaParticipant(models.Model):
         else:
             return dict(error=True)
 
-    def process_solutions(self, solutions):
-        """get toloka solutions json and process it to retrieve nessesary answer.
-        By default we retrieve otree_code from the first solution object, but it can be overriden later
-        TODO: we should make the name otree_code adjustable
-        """
-        """
-          "solutions": [
-        {
-            "output_values": {
-                "otree_code": "625fc7rf"
-            }
-        }
-    ],"""
-        if len(solutions) > 0:
-            first = solutions[0]
-            try:
-                return first.get('output_values').get('otree_code')
-            except Exception as e:
-                logger.warning(e)
-                return False
-        else:
-            return False
 
-    def check_answer(self):
-        """This one assumes that the code provided in toloka should be equal to participant code.
-        This assumption can be overrided later, that is why we move it into a separate function.
-        TODO: in reality we don't need this, we can simply check if any answer is provided, and whether the participant
-        TODO: has reached a certain page index.
-        """
-        return self.answer == self.owner.code
 
-    def get_info(self):
-        """Do something here with toloka participant  -
-           and then request in toloka the assignment status and return it back. In case of the error just return {error:true}
-           and perhaps error message provided by toloka.use sandbox param to get info
-           """
-        try:
-            """Send here to toloka request using assignment id. In case of success we disentangle the response and assign
-            its different parts to TP instance """
-            client = TolokaClient(self.sandbox)
-
-            resp = client.get_assignment_info(self.assignment)
-            self.update_info_from_toloka(resp)
-            return dict(success=True)
-
-        except Exception as e:  # let's capture some specific toloka errors TODO
-            logger.warning(e)
-            return dict(error=True)
-
-    def pay_bonus(self, host=None):
+    def pay_bonus(self):
         """iif status is accepted and bonus is paid is false then pay a bonus retrieved from bonus_to_pay"""
         # we need somehow to pay zero bonus. Let's add 0.01 for zero bonus
         if not self.bonus_paid:
@@ -227,4 +171,5 @@ class TolokaParticipant(models.Model):
             self.save()
             return dict(error=False, **resp)
         else:
+            logger.warning('Bonus already paid')
             return dict(error=True, errmsg='Bonus already paid')

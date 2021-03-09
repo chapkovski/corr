@@ -103,9 +103,9 @@ class TolokaClient:
         r = self.request_to_toloka(url, method, payload)
         return TolokaResponse(**r)
 
-    def get_pool_info(self, pool_id):
+    def get_assignments(self, pool_id):
         """Using assginment id returns a toloka response object"""
-        url = f"{self.host}/api/v1/pools/{pool_id}"
+        url = f"{self.host}/api/v1/assignments/?pool_id={pool_id}"
         method = 'GET'
         payload = None
         r = self.request_to_toloka(url, method, payload)

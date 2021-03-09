@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    command_desc = 'It sets a session var of TolokaPoolId that links current session info ' \
+    help = 'It sets a session var of TolokaPoolId that links current session info ' \
                    'with Toloka pool for retrieving and updating info later'
 
     def process_single_session(self):

@@ -22,8 +22,10 @@ class TolokaCommand(BaseCommand):
         except Session.DoesNotExist:
             logger.info(f'Session {code} is not found')
             return
-        if not s.config.get('toloka'):
-            logger.info(f'Session {code} is not toloka session')
+        toloka_pool_id = s.vars.get('toloka_pool_id')
+        if not toloka_pool_id:
+            print(
+                'Apparently the session is not yet linked to the existing toloka pool. Do it with link_session command')
             return
         participants = Participant.objects.filter(label__isnull=False, session=s)
         if not participants.exists():
