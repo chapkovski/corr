@@ -1,2 +1,4 @@
 otree==3.3.11
 psycopg2>=2.8.4
+django-dotenv
+requests

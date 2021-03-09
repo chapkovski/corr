@@ -1,4 +1,8 @@
 from os import environ
+import dotenv
+dotenv.read_dotenv()
+TOLOKA_API = environ.get('TOLOKA_API')
+SANDBOX_TOLOKA_API = environ.get('SANDBOX_TOLOKA_API')
 
 SESSION_CONFIGS = [
     dict(
@@ -35,4 +39,4 @@ DEMO_PAGE_INTRO_HTML = """ """
 SECRET_KEY = 't(zn5aln)w5)u+wj5wcqdj=0)z6lv%6#k1mg-r!&3kuec6vlb&'
 
 # if an app is included in SESSION_CONFIGS, you don't need to list it here
-INSTALLED_APPS = ['otree']
+INSTALLED_APPS = ['otree', 'tolokaregister']

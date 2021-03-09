@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="card">
+    <div class="card my-3">
         <div class="card-body">
             Вам необходимо будет выбрать между “Вариантом А” и “Вариантом Б” для каждой комбинации вашего бонуса и суммы
             пожертвования. Только одно, случайно выбранное решение определит ваш бонус и сумму пожертвования. Вы
@@ -17,7 +17,7 @@
 
     {{ formset.management_form }}
 
-    <table class="table table-hover table-stripped table-sm ">
+    <table class="table  my-3 table-stripped  ">
         <thead>
         <tr>
             <th></th>
@@ -32,18 +32,19 @@
         </tr>
         <tr>
             <th></th>
-            <th>Ваш бонус</th>
+            <th width="16%">Ваш бонус</th>
             <th class="border-right border-bottom-0 border-top-0  border-primary"
-            ">+ к пожертвованию в Фонд "Подари Жизнь"</th>
-            <th>Ваш бонус</th>
-            <th>+ к пожертвованию в Фонд "Подари Жизнь"</th>
+            width="16%">+ к пожертвованию в Фонд "Подари Жизнь"</th>
+            <th width="16%">Ваш бонус</th>
+            <th width="16%">+ к пожертвованию в Фонд "Подари Жизнь"</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
         {% for f in formset %}
             <tr>
 
-                <td>{{ f.answer.2.tag }} {{ f.answer.2.choice_label }}
+                <td>{{ f.answer.2.tag }}
                 </td>
                 <td>
                     {{ f.instance.a_ego }} центов
@@ -59,7 +60,7 @@
                 </td>
                 <td>
                     {{ f.answer.1.tag }}
-                    {{ f.answer.1.choice_label }}
+
                     {% for hidden in f.hidden_fields %}
                         {{ hidden }}
                     {% endfor %}

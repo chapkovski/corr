@@ -1,0 +1,48 @@
+{% extends "otree/BaseAdmin.html" %}
+
+{% block title %}
+    Toloka sessions
+{% endblock %}
+
+{% block content %}
+    {% if tolokasessions %}
+        <table class="table table-striped table-hover">
+            <thead>
+            <th>Session code:</th>
+            <th>Label:</th>
+            <th>Treatment:</th>
+            <th>Sandbox:</th>
+            <th>Num.participants:</th>
+            <th>Generate toloka tasks</th>
+
+            </thead>
+            <tbody>
+            {% for tolokasession in tolokasessions %}
+                <tr>
+                    <td>
+                        <a href="{% url 'tolokasession' code=tolokasession.code %}">{{ tolokasession.code }}</a>
+                    </td>
+                    <td>
+                        {{ tolokasession.label|default_if_none:'' }}
+                    </td>
+                    <td>
+                        {{ tolokasession.get_treatment|default_if_none:'' }}
+                    </td>
+                    <td>{{ tolokasession.config.toloka_sandbox|default_if_none:False }}</td>
+                    <td>
+                        {{ tolokasession.toloka_nums|default_if_none:'' }}
+                    </td>
+                    <td>
+                        <a href="{% url 'toloka_task' session_code=tolokasession.code %}">TSV</a>
+                    </td>
+
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info">No TOLOKA sessions have taken place yet.</div>
+    {% endif %}
+
+
+{% endblock %}
