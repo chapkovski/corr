@@ -19,6 +19,8 @@ class Decision(Page):
         context = self.get_context_data()
         context['form'] = self.form
         if not formset.is_valid():
+            print('PIZDA', formset.errors, )
+            print('POSTPIZDA', self.request.POST )
             self.form.add_error(None, 'all fields are required!')
             return self.render_to_response(context)
         formset.save()
@@ -34,4 +36,4 @@ class Results(Page):
     pass
 
 
-page_sequence = [Decision]
+page_sequence = [Decision, Results]

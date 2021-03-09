@@ -2,42 +2,66 @@
 {% load otree static %}
 
 {% block title %}
-    Page title
+
 {% endblock %}
 
 {% block content %}
-{{ player.tradeoffs.all }}
+    <div class="card">
+        <div class="card-body">
+            Вам необходимо будет выбрать между “Вариантом А” и “Вариантом Б” для каждой комбинации вашего бонуса и суммы
+            пожертвования. Только одно, случайно выбранное решение определит ваш бонус и сумму пожертвования. Вы
+            узнаете, какое из ваших решений было выбрано сразу как только нажмете кнопку “Далее”.
+
+        </div>
+    </div>
+
     {{ formset.management_form }}
-    <h1>{{ player.outcome.a_ego }}</h1>
+
     <table class="table table-hover table-stripped table-sm ">
         <thead>
-        <th class="align-top">
-           HEADER B
-        </th>
+        <tr>
+            <th></th>
+            <th class="text-center  align-top border-right border-bottom-0 border-top-0  border-primary"
+            " colspan="2">
+            Вариант А
+            </th>
 
-        <th class="align-top">
-            HEADER A
-
-        </th>
+            <th class="text-center align-top" colspan="2">
+                Вариант Б
+            </th>
+        </tr>
+        <tr>
+            <th></th>
+            <th>Ваш бонус</th>
+            <th class="border-right border-bottom-0 border-top-0  border-primary"
+            ">+ к пожертвованию в Фонд "Подари Жизнь"</th>
+            <th>Ваш бонус</th>
+            <th>+ к пожертвованию в Фонд "Подари Жизнь"</th>
+        </tr>
         </thead>
         <tbody>
         {% for f in formset %}
             <tr>
-                <td>
-                {{ f.instance.a_ego }}
-                </td>
- <td>
-                {{ f.instance.a_nko }}
-                </td>
- <td>
-                {{ f.instance.b_ego }}
-                </td>
- <td>
-                {{ f.instance.b_nko }}
+
+                <td>{{ f.answer.2.tag }} {{ f.answer.2.choice_label }}
                 </td>
                 <td>
-                    {% for field in f %}
-                        {% formfield field label='' %}
+                    {{ f.instance.a_ego }} центов
+                </td>
+                <td class="border-right border-bottom-0 border-top-0  border-primary">
+                    {{ f.instance.a_nko }} центов
+                </td>
+                <td>
+                    {{ f.instance.b_ego }} центов
+                </td>
+                <td>
+                    {{ f.instance.b_nko }} центов
+                </td>
+                <td>
+                    {{ f.answer.1.tag }}
+                    {{ f.answer.1.choice_label }}
+                    {% for hidden in f.hidden_fields %}
+                        {{ hidden }}
                     {% endfor %}
                 </td>
             </tr>

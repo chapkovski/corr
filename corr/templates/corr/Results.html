@@ -6,6 +6,9 @@
 {% endblock %}
 
 {% block content %}
+    {% for tradeoff in player.tradeoffs.all %}
+        {{ tradeoff.answer }}
+    {% endfor %}
 
     {% next_button %}
 {% endblock %}

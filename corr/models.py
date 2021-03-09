@@ -41,7 +41,8 @@ class Group(BaseGroup):
 
 class Player(BasePlayer):
     selected_tradeoff = models.IntegerField()
-    nko_payoff=models.CurrencyField()
+    nko_payoff = models.CurrencyField()
+
     def start(self):
         self.set_random_tradeoff()
 
