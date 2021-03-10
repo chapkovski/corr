@@ -63,6 +63,7 @@ class Constants(BaseConstants):
 
 class Subsession(BaseSubsession):
     average_donation = models.FloatField()
+    total_donation = models.FloatField()
 
     def set_payoffs(self):
         ps = [p for p in self.get_players() if p.donation is not None]
@@ -70,6 +71,7 @@ class Subsession(BaseSubsession):
             p.set_direct_payoff()
             p.save()
         self.average_donation = (sum([p.donation for p in ps]) / len(ps)) * 100
+        self.total_donation = sum([p.nko_payoff for p in ps])
         self.save()
         for p in ps:
             p.set_belief_payoff()
