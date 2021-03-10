@@ -126,6 +126,7 @@ class Player(BasePlayer):
         self.chronic_index = sum(result)
 
     def set_payoff(self):
-        self.payoff = random.randint(1, 10)
+        self.payoff = random.randint(1, 10) / 100
+
     def set_acceptable_for_toloka(self):
         self.participant.vars['toloka_acceptable'] = True
