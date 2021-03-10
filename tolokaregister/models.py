@@ -66,7 +66,7 @@ class UpdSession(Session):
                 print(
                     'Apparently the session is not yet linked to the existing toloka pool. Do it with link_session command')
                 return
-        toloka_pool_id = self.session.vars.get('toloka_pool_id')
+        toloka_pool_id = self.vars.get('toloka_pool_id')
         client = TolokaClient(sandbox=self.is_sandbox())
         pool_data = client.get_assignments(toloka_pool_id)
         items = pool_data.get('items', [])
