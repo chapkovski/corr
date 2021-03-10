@@ -59,7 +59,7 @@ class UpdSession(Session):
                 confirmation = input("session is not linked. Do you want to link it? ")
                 if confirmation == 'yes':
                     pool_id = input('insert pool id: ')
-                    self.session.link_session(pool_id)
+                    self.link_session(pool_id)
                 else:
                     return
             else:
@@ -76,7 +76,7 @@ class UpdSession(Session):
                 owner = tp.owner
             except TolokaParticipant.DoesNotExist:
                 try:
-                    owner = Participant.objects.get(label=i.get('id'), session=self.session)
+                    owner = Participant.objects.get(label=i.get('id'), session=self)
                 except Participant.DoesNotExist:
                     logger.warning(f'Participant for assignment {i.get("id")} hasnt been found')
                     continue
