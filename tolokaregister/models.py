@@ -167,9 +167,10 @@ class TolokaParticipant(models.Model):
 
     def get_bonus_message(self):
         p = self.owner.singledonat_player.all().first()
-        totbonus = f'{float(p.payoff)} USD'
-        donationpart = f'{float(p.direct_payoff)} USD'
-        beliefpart = f'{float(p.belief_payoff)} USD'
+        formatter = lambda x: f'{round(float(x), 2)} USD'
+        totbonus = formatter(p.payoff)
+        donationpart = formatter(p.direct_payoff)
+        beliefpart = formatter(p.belief_payoff)
         msg = f'Ваш бонус составляет {totbonus} и состоит из {donationpart} за первую часть и {beliefpart} за вторую часть.' \
               f' Спасибо за участие!'
         return msg
