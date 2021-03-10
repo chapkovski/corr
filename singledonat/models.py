@@ -65,7 +65,7 @@ class Subsession(BaseSubsession):
     average_donation = models.FloatField()
 
     def set_payoffs(self):
-        ps = self.get_players()
+        ps = [p for p in self.get_players() if p.donation is not None]
         for p in ps:
             p.set_direct_payoff()
             p.save()
