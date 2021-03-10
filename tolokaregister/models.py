@@ -167,7 +167,12 @@ class TolokaParticipant(models.Model):
 
     def get_bonus_message(self):
         p = self.owner.singledonat_player.all().first()
-        print(p.nko_payoff)
+        totbonus = f'{float(p.payoff)} USD'
+        donationpart = f'{float(p.direct_payoff)} USD'
+        beliefpart = f'{float(p.belief_payoff)} USD'
+        msg = f'Ваш бонус составляет {totbonus} и состоит из {donationpart} за первую часть и {beliefpart} за вторую часть.' \
+              f' Спасибо за участие!'
+        return msg
 
     def pay_bonus(self):
         """iif status is accepted and bonus is paid is false then pay a bonus retrieved from bonus_to_pay"""
