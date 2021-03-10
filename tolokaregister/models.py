@@ -10,6 +10,9 @@ logger = logging.getLogger(__name__)
 DEFAULT_BONUS_TITLE = 'Cпасибо за ваше участие!'
 DEFAULT_BONUS_MESSAGE = 'Cпасибо за ваше участие! Надеемся, что вы сможете поучаствовать в других наших исследованиях'
 MINIMUM_BONUS_AMOUNT = 0.01
+
+class UnAcceptedAnswer(Exception):
+    pass
 """
 -  status (accept, reject, unknown, active, submitted, error)
 - Info (just a dump for response based on label of initial participant),  
@@ -130,8 +133,8 @@ class TolokaParticipant(models.Model):
         that they ve reached the stage where they can be paid. For the simplicity, I'll set somewhere the participant'var
         'toloka_acceptable' to true.
         """
-        acceptable = self.owner.vars.get('')
-        return self.status == StatusEnum.submitted
+        acceptable = self.owner.vars.get('toloka_acceptable')
+        return self.status == StatusEnum.submitted and acceptable
 
 
 
@@ -143,12 +146,13 @@ class TolokaParticipant(models.Model):
         """
         if self.acceptable:
             client = TolokaClient(self.sandbox)
+            # TODO error handling
             resp = client.accept_assignment(self.assignment)
             self.status = resp.status
             self.save()
             return dict(error=False, **resp)  # send toloka accept request here
         else:
-            return dict(error=True)
+            raise UnAcceptedAnswer('Answer is not marked for acceptance')
 
 
 

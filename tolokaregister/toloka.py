@@ -66,49 +66,51 @@ class TolokaClient:
         """Im not sure we need separate url methods, but if later on toloka changes the urls, it will be easier to
         replace just these methods.
         """
-        return f"{self.host}/api/v1/assignments/{assignment_id}"
+        return f"assignments/{assignment_id}"
 
     def get_bonus_url(self):
         """Im not sure we need separate url methods, but if later on toloka changes the urls, it will be easier to
         replace just these methods.
         """
-        return f"{self.host}/api/v1/user-bonuses"
+        return f"user-bonuses"
 
     def get_error_msg(self, resp):
         return dict(error=True,
                     error_status=resp.status_code,
                     error_raw=resp.json())
 
-    def request_to_toloka(self, url, method, payload, ):
-        headers = self.get_headers()
+    def get_full_url(self, url):
+        return f"{self.host}/api/v1/{url}"
 
+    def request_to_toloka(self, url, method='GET', payload={}, ):
+        headers = self.get_headers()
         if isinstance(payload, dict):
             payload = json.dumps(payload)
 
         if isinstance(payload, str):
             payload = payload.encode('utf-8')
 
-        response = requests.request(method, url, headers=headers, data=payload)
+        response = requests.request(method,
+                                    self.get_full_url(url),
+                                    headers=headers,
+                                    data=payload)
 
         if 200 <= response.status_code <= 300:
             return response.json()
         else:
+            logger.warning(f'request to  "{url}" failed with status {response.status_code}')
             return self.get_error_msg(response)
 
     def get_assignment_info(self, assignment_id):
         """Using assginment id returns a toloka response object"""
         url = self.get_assignment_url(assignment_id)
-        method = 'GET'
-        payload = None
-        r = self.request_to_toloka(url, method, payload)
+        r = self.request_to_toloka(url)
         return TolokaResponse(**r)
 
     def get_assignments(self, pool_id):
         """Using assginment id returns a toloka response object"""
-        url = f"{self.host}/api/v1/assignments/?pool_id={pool_id}"
-        method = 'GET'
-        payload = None
-        r = self.request_to_toloka(url, method, payload)
+        url = f"assignments/?pool_id={pool_id}"
+        r = self.request_to_toloka(url)
         return TolokaResponse(**r)
 
     def pool_exists(self, pool_id):
@@ -121,7 +123,7 @@ class TolokaClient:
             logger.warning(f'Pool "{pool_id}" does not exist, status {response.status_code}')
             return False
 
-    def accept_assignment(self, assignment_id):
+    def accept_assignment(self, assignment_id, msg=DEFAULT_ACCEPT_MSG):
         """given assignment id, accept assignment. The method DOES NOT CHECK whether the assignment is in acceptable status.
         for instance it is not in ACTIVE mode. It just stupidly sends accept post. All checking should be done by
         a calling function/instance. Returns toloka response object"""
@@ -129,7 +131,7 @@ class TolokaClient:
         method = 'PATCH'
         # we can think about customizing acceptance message later, it's not important
         payload = dict(status='ACCEPTED',
-                       public_comment=DEFAULT_ACCEPT_MSG)
+                       public_comment=msg)
         # todo: error handnling
         r = self.request_to_toloka(url, method, payload)
         return TolokaResponse(**r)
@@ -144,6 +146,11 @@ class TolokaClient:
         # todo: error handnling
         r = self.request_to_toloka(url, method, payload)
         return TolokaResponse(**r)
+
+    def get_balance(self):
+        url = 'requester'
+        r = self.request_to_toloka(url)
+        return r.get('balance')
 
 
 class TolokaResponse(objdict):
