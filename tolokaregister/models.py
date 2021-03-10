@@ -165,6 +165,10 @@ class TolokaParticipant(models.Model):
         else:
             raise UnAcceptedAnswer('Answer is not marked for acceptance')
 
+    def get_bonus_message(self):
+        p = self.owner.singledonat_player.all().first()
+        print(p.nko_payoff)
+
     def pay_bonus(self):
         """iif status is accepted and bonus is paid is false then pay a bonus retrieved from bonus_to_pay"""
         # we need somehow to pay zero bonus. Let's add 0.01 for zero bonus
