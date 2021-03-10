@@ -166,15 +166,18 @@ class TolokaParticipant(models.Model):
             raise UnAcceptedAnswer('Answer is not marked for acceptance')
 
     def get_bonus_message(self):
-        p = self.owner.singledonat_player.all().first()
-        formatter = lambda x: f'{round(float(x), 2)} USD'
-        totbonus = formatter(p.payoff)
-        donationpart = formatter(p.direct_payoff)
-        beliefpart = formatter(p.belief_payoff)
-        msg = f'Ваш бонус составляет {totbonus} и состоит из {donationpart} за первую часть и {beliefpart} за вторую часть.' \
-              f' Спасибо за участие!'
-        return msg
-
+        try:
+            p = self.owner.singledonat_player.all().first()
+            formatter = lambda x: f'{round(float(x), 2)} USD'
+            totbonus = formatter(p.payoff)
+            donationpart = formatter(p.direct_payoff)
+            beliefpart = formatter(p.belief_payoff)
+            msg = f'Ваш бонус составляет {totbonus} и состоит из {donationpart} за первую часть и {beliefpart} за вторую часть.' \
+                  f' Спасибо за участие!'
+            return msg
+        except Exception as e:
+            logger.warning(f'Fail to form bonus message. Fallback to default')
+            return DEFAULT_BONUS_MESSAGE
     def pay_bonus(self):
         """iif status is accepted and bonus is paid is false then pay a bonus retrieved from bonus_to_pay"""
         # we need somehow to pay zero bonus. Let's add 0.01 for zero bonus
@@ -187,7 +190,7 @@ class TolokaParticipant(models.Model):
             if bonus == 0:
                 bonus = MINIMUM_BONUS_AMOUNT
             title = DEFAULT_BONUS_TITLE
-            message = DEFAULT_BONUS_MESSAGE
+            message = self.get_bonus_message()
 
             resp = client.pay_bonus(user_id, bonus, title, message)
             self.bonus_paid = True
