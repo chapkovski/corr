@@ -108,8 +108,9 @@ class TolokaClient:
         return TolokaResponse(**r)
 
     def get_assignments(self, pool_id):
-        """Using assginment id returns a toloka response object"""
-        url = f"assignments/?pool_id={pool_id}"
+        """Using pool id returns all assignment objs"""
+        # I don't think we ever reach this limit, and if someone does he/she is smart enough to think about this
+        url = f"assignments/?pool_id={pool_id}&limit=10000"
         r = self.request_to_toloka(url)
         return TolokaResponse(**r)
 
