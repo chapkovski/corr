@@ -18,11 +18,17 @@ class Instructions(Page):
 class CQ(Page):
     form_model = 'player'
     form_fields = ['cq1', 'cq2', 'cq3']
+
     def error_message(self, values):
-        for k,v in values.items():
+        for k, v in values.items():
             if v != Constants.correct_answers[k]:
-                self.player.cq_counter+=1
+                self.player.cq_counter += 1
                 return 'Пожалуйста, проверьте правильность ваших ответов!'
+
+
+class BeforeDecision(Page):
+    pass
+
 
 class Decision(Page):
     form_model = 'player'
@@ -43,12 +49,13 @@ class EndlineAnnounced(Page):
 
 
 page_sequence = [
-    # Intro,
-    # NKOExplained,
-    # Instructions,
-    # CQ,
+    Intro,
+    NKOExplained,
+    Instructions,
+    CQ,
+    BeforeDecision,
     Decision,
-    # BeliefExplained,
+    BeliefExplained,
     Belief,
-    # EndlineAnnounced
+    EndlineAnnounced
 ]
