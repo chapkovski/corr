@@ -39,10 +39,10 @@ class UpdSession(Session):
             return
         sandbox = self.is_sandbox()
         client = TolokaClient(sandbox=sandbox)
-        if client.pool_exists(self.pool_id):
-            logger.info(f'Pool {self.pool_id} exists')
+        if client.pool_exists(pool_id):
+            logger.info(f'Pool {pool_id} exists')
         else:
-            logger.warning(f'Pool {self.pool_id} *DOES NOT* exist')
+            logger.warning(f'Pool {pool_id} *DOES NOT* exist')
             # todo: should we raise custom exception here?
             return
 
