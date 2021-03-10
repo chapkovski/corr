@@ -1,27 +1,27 @@
 import logging
-from tolokaregister.models import TolokaParticipant, StatusEnum, UnAcceptedAnswer
-from ._uni_toloka_command import TolokaCommand
+from tolokaregister.models import UpdSession
+from django.core.management.base import BaseCommand
 
 logger = logging.getLogger(__name__)
 
 
-class Command(TolokaCommand):
-    command_desc = 'accepting'
+class Command(BaseCommand):
+    help = 'accepting a bunch of toloka submissions based on their statuses; requires session code'
 
-    def do_over_single(self, p, sandbox=False):
-        try:
-            tp = TolokaParticipant.objects.get(owner=p)
-        except TolokaParticipant.DoesNotExist:
-            logger.info(f'No status known for participant {p.code}')
-            return
-        if tp.status != StatusEnum.submitted:
-            logger.info(f'Cant accept assignment {tp.assignment} for user {p.code}. Current status is {tp.status}')
-            return
+    def add_arguments(self, parser):
+        parser.add_argument('session_code', help='toloka session code ', type=str)
 
+    def get_session(self):
         try:
-            tp.accept_assignment()
-        except UnAcceptedAnswer:
-            logger.warning(f'Submission failed. Current user status is {tp.status}. User {p.code},'
-                        f' assignment {tp.assignment}')
-        else:
-            logger.info(f'User {p.code} is accepted')
+            s = UpdSession.objects.get(code=self.session_code)
+        except UpdSession.DoesNotExist:
+            logger.warning(f'Session {self.session_code} is not found')
+            return
+        return s
+
+    def handle(self, session_code, *args, **options):
+        logger.info(f'This command will accept all the acceptable toloka submissions')
+        self.session_code = session_code
+        self.session = self.get_session()
+        if self.session:
+            self.session.accept_toloka(request_linkage=True)

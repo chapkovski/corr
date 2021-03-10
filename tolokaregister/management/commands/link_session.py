@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 import logging
 from otree.models import Session, Participant
 from tolokaregister.toloka import TolokaClient
+from tolokaregister.models import UpdSession
 
 logger = logging.getLogger(__name__)
 
@@ -12,28 +13,15 @@ class Command(BaseCommand):
 
     def process_single_session(self):
         # TODO: make sandbox based on toloka param
-        client = TolokaClient(sandbox=False)
-        if client.pool_exists(self.pool_id):
-            logger.info(f'Pool {self.pool_id} exists')
-        else:
-            logger.warning(f'Pool {self.pool_id} *DOES NOT* exist')
-            return
+
 
         try:
-            s = Session.objects.get(code=self.session_code)
+            s = UpdSession.objects.get(code=self.session_code)
         except Session.DoesNotExist:
             logger.info(f'Session {self.session_code} is not found')
             return
-        # TODO: do we need this check? with the link command we can link any session actually.
-        # if not s.config.get('toloka'):
-        #     logger.info(f'Session {code} is not toloka session')
-        #     return
+        s.link_session(self.pool_id)
 
-        if s.vars.get('toloka_pool_id'):
-            logger.warning('Session was already linked. Going to override')
-        s.vars['toloka_pool_id'] = self.pool_id
-        s.save()
-        logger.info(f'Session "{s.code}" and pool "{self.pool_id}" are linked now.')
 
     def add_arguments(self, parser):
         parser.add_argument('session_code', help='toloka session code to link to', type=str)

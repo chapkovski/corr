@@ -11,72 +11,94 @@ DEFAULT_BONUS_TITLE = 'Cпасибо за ваше участие!'
 DEFAULT_BONUS_MESSAGE = 'Cпасибо за ваше участие! Надеемся, что вы сможете поучаствовать в других наших исследованиях'
 MINIMUM_BONUS_AMOUNT = 0.01
 
+
+class StatusEnum(str, Enum):
+    unknown = 'UNKNOWN'
+    submitted = 'SUBMITTED'
+    accepted = 'ACCEPTED'
+    rejected = 'REJECTED'
+    active = 'ACTIVE'
+    error = 'ERROR'
+
+
 class UnAcceptedAnswer(Exception):
     pass
-"""
--  status (accept, reject, unknown, active, submitted, error)
-- Info (just a dump for response based on label of initial participant),  
-- assignment (=label by initial participant), 
-- bonus_paid (flag/amount if bonus has been paid via otree interface). 
-- bonus_amount-  total amount paid via interface
-- answer_is_correct - compare the answer with the participant code
-- answer
-- bonus_is_calculated
-
-"""
-"""
-RESPONSE EXAMPLE
-"""
-"""
-SANDBOX ASSIGNMENT EXAMPLE 000005e173--5eb766016ce18f023c602691
-{
-    "id": "0000cba366--5eb5e222a8f57568f628784f",
-    "task_suite_id": "0000cba366--5eb5e1f7cbef577b72d5b189",
-    "pool_id": "13345638",
-    "user_id": "326dd7a1de11772eca554c59cbcf13e7",
-    "status": "ACCEPTED",
-    "reward": 0.10,
-    "tasks": [
-        {
-            "id": "b27a23f7-e3fa-49d3-a8d6-7fd0c8c41aff",
-            "input_values": {
-                "session_url": "https://stormy-chamber-12502.herokuapp.com/join/b4eedm5raj/"
-            }
-        }
-    ],
-    "solutions": [
-        {
-            "output_values": {
-                "otree_code": "625fc7rf"
-            }
-        }
-    ],
-    "mixed": false,
-    "automerged": false,
-    "created": "2020-05-08T22:50:10.809",
-    "submitted": "2020-05-08T22:50:54.934",
-    "accepted": "2020-05-08T23:15:39.717",
-    "owner": {
-        "id": "e8272061e849238f597cb3c5e757ade7",
-        "myself": true
-    }
-}
-"""
 
 
 class UpdSession(Session):
     class Meta:
         proxy = True
 
-    def get_treatment(self):
-        """This is far from universility, and specific for Daria's project only"""
-        tp = self.config.get('tp', False)
-        stress = self.config.get('stress', False)
-        return f'TP: {tp}; STRESS: {stress}'
+    def is_linked(self):
+        return bool(self.vars.get('toloka_pool_id'))
 
-    def toloka_nums(self):
-        # it is a very very rough way to estimate toloka participants (which pass their id to label)
-        return self.participant_set.filter(label__isnull=False).count()
+    def link_session(self, pool_id):
+
+        if self.vars.get('toloka_pool_id'):
+            logger.warning(f"session is already linked to pool {self.vars.get('toloka_pool_id')}")
+            return
+        sandbox = self.is_sandbox()
+        client = TolokaClient(sandbox=sandbox)
+        if client.pool_exists(self.pool_id):
+            logger.info(f'Pool {self.pool_id} exists')
+        else:
+            logger.warning(f'Pool {self.pool_id} *DOES NOT* exist')
+            # todo: should we raise custom exception here?
+            return
+
+        self.vars['toloka_pool_id'] = pool_id
+        self.save()
+        logger.info(f'Session "{self.code}" and pool "{pool_id}" are linked now.')
+
+    def is_sandbox(self):
+        return self.config.get('toloka_sandbox', False)
+
+    def get_or_update_info(self, request_linkage=False):
+        if not self.is_linked():
+            if request_linkage:
+                confirmation = input("session is not linked. Do you want to link it? ")
+                if confirmation == 'yes':
+                    pool_id = input('insert pool id: ')
+                    self.session.link_session(pool_id)
+                else:
+                    return
+            else:
+                print(
+                    'Apparently the session is not yet linked to the existing toloka pool. Do it with link_session command')
+                return
+        toloka_pool_id = self.session.vars.get('toloka_pool_id')
+        client = TolokaClient(sandbox=self.is_sandbox())
+        pool_data = client.get_assignments(toloka_pool_id)
+        items = pool_data.get('items', [])
+        for i in items:
+            try:
+                tp = TolokaParticipant.objects.get(assignment=i.get('id'))
+                owner = tp.owner
+            except TolokaParticipant.DoesNotExist:
+                try:
+                    owner = Participant.objects.get(label=i.get('id'), session=self.session)
+                except Participant.DoesNotExist:
+                    logger.warning(f'Participant for assignment {i.get("id")} hasnt been found')
+                    continue
+            tp, _ = TolokaParticipant.objects.update_or_create(owner=owner,
+                                                               assignment=i.get('id'),
+                                                               defaults=dict(
+                                                                   status=i.get('status'),
+                                                                   info=json.dumps(i),
+                                                                   toloka_user_id=i.get('user_id'),
+                                                                   sandbox=False
+                                                               )
+                                                               )
+            logger.info(f'participant {tp.owner.code}: status {tp.status}; assignment: {tp.assignment}')
+        return items  # we need this for acceptance
+
+    def accept_toloka(self, request_linkage=False):
+        records = self.get_or_update_info(request_linkage)
+        submitted = [i for i in records if i.get('status') == StatusEnum.submitted]
+        acceptable = [i for i in submitted if i.acceptable]
+        logger.info(f'I am planning to accept the following number of submissions: {len(acceptable)}')
+        for i in acceptable:
+            i.accept_assignment()
 
 
 class UpdParticipant(Participant):
@@ -92,15 +114,6 @@ class UpdParticipant(Participant):
             return r
         except  TolokaParticipant.DoesNotExist as e:
             return False
-
-
-class StatusEnum(str, Enum):
-    unknown = 'UNKNOWN'
-    submitted = 'SUBMITTED'
-    accepted = 'ACCEPTED'
-    rejected = 'REJECTED'
-    active = 'ACTIVE'
-    error = 'ERROR'
 
 
 class TolokaParticipant(models.Model):
@@ -136,9 +149,6 @@ class TolokaParticipant(models.Model):
         acceptable = self.owner.vars.get('toloka_acceptable')
         return self.status == StatusEnum.submitted and acceptable
 
-
-
-
     def accept_assignment(self):
         """check if status is Submitted. and iif yes - send accept request to toloka, return positive response back.
         otherwise sends error=True back. use sandbox param to get info.
@@ -153,8 +163,6 @@ class TolokaParticipant(models.Model):
             return dict(error=False, **resp)  # send toloka accept request here
         else:
             raise UnAcceptedAnswer('Answer is not marked for acceptance')
-
-
 
     def pay_bonus(self):
         """iif status is accepted and bonus is paid is false then pay a bonus retrieved from bonus_to_pay"""
