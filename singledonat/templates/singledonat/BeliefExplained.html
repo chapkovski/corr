@@ -1,0 +1,34 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block title %}
+    Часть 2
+
+{% endblock %}
+
+{% block content %}
+    <div class="card my-3">
+        <div class="card-body">
+            <div>
+                На следующей странице мы попросим вас ответить на вопрос:
+
+            </div>
+            <div class="lead text-center">
+                Какая доля (от 0 до 100) оставшихся участников выбрала опцию: <br> <span class="font-italic">'({{ Constants.donation_message }}')</span> ?
+
+            </div>
+            <div class="my-3">
+                Если вы угадаете эту долю (плюс-минус <b> 5%</b>), то вы получите дополнительный бонус <b>20 центов</b>
+
+            </div>
+            <div class="my-3">
+                Если вы угадаете эту долю (плюс-минус <b> 10% </b>), то вы получите дополнительный бонус <b>10 центов</b>
+
+            </div>
+
+
+        </div>
+    </div>
+    {% next_button %}
+
+{% endblock %}

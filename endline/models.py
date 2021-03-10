@@ -10,15 +10,15 @@ from otree.api import (
 )
 import random
 
-author = 'Philip Chapkovski'
+author = 'Philip Chapkovski, HSE-Moscow'
 
 doc = """
-Your app description
+Endline for corrreg
 """
 
 
 class Constants(BaseConstants):
-    name_in_url = 'experimental_toloka'
+    name_in_url = 'endline'
     players_per_group = None
     num_rounds = 1
     chronic_choices_texts = ['никогда', 'почти никогда', 'иногда', 'довольно часто', 'часто']
@@ -125,8 +125,7 @@ class Player(BasePlayer):
             result.append(v)
         self.chronic_index = sum(result)
 
-    def set_payoff(self):
-        self.payoff = random.randint(1, 10) / 100
+
 
     def set_acceptable_for_toloka(self):
         self.participant.vars['toloka_acceptable'] = True

@@ -1,0 +1,38 @@
+{% extends "global/Page.html" %}
+{% load otree  i18n %}
+
+{% block title %}
+    <div class="text-center"> {% trans 'Благодарим за участие!' %}</div>
+{% endblock %}
+{% block progress %}
+
+{% endblock %}
+{% block content %}
+
+    <div class="card">
+        <div class="card-body">
+            <div class="lead text-center">{% trans 'Ваш код' %}
+                <div class="text-center"><span class="font-weight-bold display-4">{{ participant.code }}</span>
+                </div>
+            </div>
+            <div class="lead my-3  ">
+                {% blocktrans %}Для того, чтобы задание считалось выполненным, пожалуйста скопируйте его и вставьте на
+                    страницу
+                    задания в Толоке.{% endblocktrans %}
+            </div>
+            <div class="my-3 lead">
+                Этот же код будет в квитанции в адрес Фонда "Подари Жизнь", если вы приняли решение, которое увеличивает
+                наши пожертвования в адрес этого Фонда.
+            </div>
+            <div class="my-3 lead">
+                Как только все оставшиеся участники примут свои решения, мы сможем посчитать бонусы и выплатить их вам.
+            </div>
+            <div class="lead text-center font-weight-bold my-3">
+                Имейте в виду, что на это может потребоваться время!
+            </div>
+        </div>
+    </div>
+
+    <button class="d-none">Next</button>
+{% endblock %}
+

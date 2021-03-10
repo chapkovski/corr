@@ -1,0 +1,23 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block title %}
+    Примите решение:
+{% endblock %}
+
+{% block content %}
+    <div class="card my-3">
+        <div class="card-body">
+            <div class="my-3">
+                В этом исследовании вы <b>сами</b> определяете размер своего бонуса.
+            </div>
+            <div>В зависимости от вашего выбора изменится сумма пожертвований, которую мы внесем в Фонд "Подари Жизнь".</div>
+            <div>Вам необходимо выбрать между двумя следующими вариантами.</div>
+
+            <div  class="my-3">{% formfield player.donation label='' %}</div>
+
+        </div>
+    </div>
+    {% next_button %}
+
+{% endblock %}

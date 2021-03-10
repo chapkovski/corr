@@ -1,21 +1,23 @@
 from os import environ
 import dotenv
+
 dotenv.read_dotenv()
 TOLOKA_API = environ.get('TOLOKA_API')
 SANDBOX_TOLOKA_API = environ.get('SANDBOX_TOLOKA_API')
 
 SESSION_CONFIGS = [
+
     dict(
-       name='corr',
-       display_name="corr",
-       num_demo_participants=1,
-       app_sequence=['corr']
+        name='endline',
+        display_name="endline",
+        num_demo_participants=1,
+        app_sequence=['endline']
     ),
     dict(
-       name='expt',
-       display_name="expt",
-       num_demo_participants=1,
-       app_sequence=['experimental_toloka']
+        name='singledonat',
+        display_name="singledonat",
+        num_demo_participants=1,
+        app_sequence=['singledonat', 'endline']
     ),
 ]
 

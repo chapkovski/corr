@@ -1,0 +1,32 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block title %}
+    Анкета
+{% endblock %}
+
+{% block content %}
+    <div class="card my-3">
+        <div class="card-body">
+            <div class="my-3">
+                На следующей странице мы попросим вас заполнить небольшую анкету, после чего вы получите уникальный код.
+            </div>
+            <div class="my-3">
+
+                Вставьте этот код в интерфейс Толоки, чтобы мы могли вам заплатить за участие.
+            </div>
+            <div class="my-3">
+                Как только все оставшиеся участники примут свои решения, мы сможем посчитать бонусы и выплатить их вам.
+
+            </div>
+            <div class="lead text-center font-weight-bold my-3">
+
+                Имейте в виду, что на это может потребоваться время!
+            </div>
+
+
+        </div>
+    </div>
+    {% next_button %}
+
+{% endblock %}
