@@ -168,11 +168,14 @@ class TolokaParticipant(models.Model):
     def get_bonus_message(self):
         try:
             p = self.owner.singledonat_player.all().first()
+            own_belief = p.belief
+            actual = round(p.subsession.average_donation,2)
             formatter = lambda x: f'{round(float(x), 2)} USD'
             totbonus = formatter(p.payoff)
             donationpart = formatter(p.direct_payoff)
             beliefpart = formatter(p.belief_payoff)
-            msg = f'Ваш бонус составляет {totbonus} и состоит из {donationpart} за первую часть и {beliefpart} за вторую часть.' \
+            msg = f'Ваш бонус составляет {totbonus} и состоит из {donationpart} за первую часть и {beliefpart} за вторую часть. ' \
+                  f'Во второй части доля выбравших опцию 1 была {actual}, ваш ответ был: {own_belief}; ' \
                   f' Спасибо за участие!'
             return msg
         except Exception as e:
