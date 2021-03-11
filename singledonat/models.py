@@ -94,6 +94,7 @@ class Player(BasePlayer):
     cq2 = models.IntegerField(label=Constants.cq_label, choices=Constants.CQ2_CHOICES, widget=widgets.RadioSelect)
     cq3 = models.IntegerField(label=Constants.cq_label, choices=Constants.CQ3_CHOICES, widget=widgets.RadioSelect)
     cq_counter = models.IntegerField(initial=0)
+    attention_counter = models.IntegerField(initial=0)
     attention = models.BooleanField()
     attention_agreement = models.BooleanField(widget=widgets.CheckboxInput)
 

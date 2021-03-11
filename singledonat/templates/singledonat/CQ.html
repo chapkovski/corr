@@ -6,7 +6,39 @@
 {% endblock %}
 
 {% block content %}
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <p>
+
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample"
+                aria-expanded="false" aria-controls="collapseExample" id="instbtn">
+            Показать инструкции
+        </button>
+    </p>
+    <div class="collapse" id="collapseExample">
+        <div class="card card-body">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    {% include 'singledonat/includes/intro_block.html' %}
+                </li>
+                <li class="list-group-item">
+                    {% include 'singledonat/includes/instruction_block.html' %}
+                </li>
+                <li class="list-group-item">
+                    {% include 'singledonat/includes/nko_block.html' %}
+                </li>
+
+            </ul>
+
+
+        </div>
+    </div>
+
     {% formfields %}
+    <script>
+    $('#collapseExample').on('hidden.bs.collapse', function () {
+$('#instbtn').html('Показать инструкции').addClass('btn-primary').removeClass('btn-warning')
+}).on('shown.bs.collapse', function(){$('#instbtn').html('Скрыть инструкции').addClass('btn-warning').removeClass('btn-primary')})
+    </script>
     {% next_button %}
 
 {% endblock %}
