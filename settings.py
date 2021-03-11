@@ -17,7 +17,10 @@ SESSION_CONFIGS = [
         name='singledonat',
         display_name="singledonat",
         num_demo_participants=1,
-        app_sequence=['singledonat', 'endline']
+        app_sequence=[
+            'singledonat',
+            'endline'
+        ]
     ),
 ]
 

@@ -9,8 +9,16 @@ class SocialEconomic(Page):
         'age', 'gender', 'education', 'education1', 'occupation', 'birth', 'game',
         'money',
     ]
+
     def before_next_page(self):
         self.player.set_acceptable_for_toloka()
+
+
+class Comments(Page):
+    form_model = 'player'
+    form_fields = [
+        'general_comments',
+    ]
 
 
 class Last(Page):
@@ -19,5 +27,6 @@ class Last(Page):
 
 page_sequence = [
     SocialEconomic,
+    Comments,
     Last
 ]
