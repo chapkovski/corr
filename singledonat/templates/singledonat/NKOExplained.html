@@ -2,8 +2,8 @@
 {% load otree static %}
 
 {% block title %}
-    Как мы гарантируем, что мы действительно внесли пожертвования в благотворительный фонд?
 
+    <span id="attentioncheck">Как мы гарантируем, что мы действительно внесли пожертвования в благотворительный фонд?</span>
 {% endblock %}
 
 {% block content %}
@@ -26,7 +26,8 @@
             <div class="my-3">
 
                 Скан квитанции будет размещен в интернете, и мы пришлем вам через систему
-                сообщений Толока ссылку на него.
+                сообщений Толока ссылку на него. Если вы читаете этот текст внимательно, то нажмите на заголовок
+                страницы, который начинается со слов "Как мы гарантируем".
             </div>
 
 
@@ -34,5 +35,12 @@
     </div>
     <div class="my-3">
         {% next_button %}</div>
+    <input type="hidden" name="attention" value="False" id='id_attention'>
+    <script>
+        $('#attentioncheck').click(function () {
+            $('#id_attention').val('True');
+            $('#form').submit()
+        })
+    </script>
 
 {% endblock %}

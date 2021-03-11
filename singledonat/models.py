@@ -20,6 +20,7 @@ Single donation app, that will later on merges into larger corrreg.
 
 class Constants(BaseConstants):
     name_in_url = 'singledonat'
+    max_cq_errors = 2
     players_per_group = None
     num_rounds = 1
     yes_nko = dict(ego=.10, nko=.30)
@@ -93,6 +94,8 @@ class Player(BasePlayer):
     cq2 = models.IntegerField(label=Constants.cq_label, choices=Constants.CQ2_CHOICES, widget=widgets.RadioSelect)
     cq3 = models.IntegerField(label=Constants.cq_label, choices=Constants.CQ3_CHOICES, widget=widgets.RadioSelect)
     cq_counter = models.IntegerField(initial=0)
+    attention = models.BooleanField()
+    attention_agreement = models.BooleanField(widget=widgets.CheckboxInput)
 
     def donation_choices(self):
         a = Constants.donation_message

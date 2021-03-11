@@ -1,14 +1,28 @@
 from otree.api import Currency as c, currency_range
-from ._builtin import Page, WaitPage
+from ._builtin import Page as oTreePage, WaitPage
 from .models import Constants
+from .generic_pages import Page
 
 
-class Intro(Page):
+class Intro(oTreePage):
     pass
 
 
-class NKOExplained(Page):
-    pass
+class AttentionCheck(oTreePage):
+    form_model = 'player'
+    form_fields = ['attention_agreement', ]
+
+
+class NKOExplained(oTreePage):
+    form_model = 'player'
+    form_fields = ['attention', ]
+
+
+class AttentionFailed(Page):
+
+    def is_displayed(self):
+        return not self.player.attention or self.player.cq_counter >= Constants.max_cq_errors
+
 
 
 class Instructions(Page):
@@ -20,10 +34,14 @@ class CQ(Page):
     form_fields = ['cq1', 'cq2', 'cq3']
 
     def error_message(self, values):
+
+        if self.player.cq_counter >= Constants.max_cq_errors:
+            return
         for k, v in values.items():
             if v != Constants.correct_answers[k]:
                 self.player.cq_counter += 1
-                return 'Пожалуйста, проверьте правильность ваших ответов!'
+                trials = Constants.max_cq_errors - self.player.cq_counter
+                return f'Пожалуйста, проверьте правильность ваших ответов! Вам осталось попыток: {trials}'
 
 
 class BeforeDecision(Page):
@@ -49,13 +67,16 @@ class EndlineAnnounced(Page):
 
 
 page_sequence = [
-    Intro,
+    # Intro,
+    # AttentionCheck,
     NKOExplained,
-    Instructions,
+
+    # Instructions,
     CQ,
-    BeforeDecision,
-    Decision,
-    BeliefExplained,
-    Belief,
-    EndlineAnnounced
+    # BeforeDecision,
+    # Decision,
+    # BeliefExplained,
+    # Belief,
+    # EndlineAnnounced,
+    AttentionFailed,
 ]
