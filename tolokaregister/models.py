@@ -99,7 +99,10 @@ class UpdSession(Session):
         acceptable = TolokaParticipant.objects.filter(assignment__in=submitted_ids)
         logger.info(f'I am planning to accept the following number of submissions: {acceptable.count()}')
         for i in acceptable:
-            i.accept_assignment()
+            try:
+                i.accept_assignment()
+            except UnAcceptedAnswer:
+                logger.warning(f'Participant {i.code}; assignment id {i.assignment} is unacceptable; status: {i.status}; vars dump: {i.owner.vars} ')
 
 
 class UpdParticipant(Participant):
