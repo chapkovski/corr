@@ -102,7 +102,7 @@ class UpdSession(Session):
             try:
                 i.accept_assignment()
             except UnAcceptedAnswer:
-                logger.warning(f'Participant {i.code}; assignment id {i.assignment} is unacceptable; status: {i.status}; vars dump: {i.owner.vars} ')
+                logger.warning(f'Participant {i.owner.code}; assignment id {i.assignment} is unacceptable; status: {i.status}; vars dump: {i.owner.vars} ')
 
 
 class UpdParticipant(Participant):
