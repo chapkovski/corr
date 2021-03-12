@@ -97,7 +97,7 @@ class UpdSession(Session):
         submitted = [i for i in records if i.get('status') == StatusEnum.submitted]
         submitted_ids = [i.get('id') for i in submitted]
         acceptable = [i for i in TolokaParticipant.objects.filter(assignment__in=submitted_ids) if i.acceptable]
-        logger.info(f'I am planning to accept the following number of submissions: {acceptable.count()}')
+        logger.info(f'I am planning to accept the following number of submissions: {len(acceptable)}')
         for i in acceptable:
             try:
                 i.accept_assignment()
