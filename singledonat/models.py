@@ -10,7 +10,8 @@ from otree.api import (
 )
 import random
 from django.utils.html import mark_safe
-
+import logging
+logger = logging.getLogger(__name__)
 author = 'Philip Chapkovski, HSE-Moscow'
 
 doc = """
@@ -18,13 +19,17 @@ Single donation app, that will later on merges into larger corrreg.
 """
 
 
+def to_cents(v):
+    # todo do something smart here but not now
+    return f'{int(v * 100)} центов'
+
+
 class Constants(BaseConstants):
     name_in_url = 'singledonat'
     max_cq_errors = 2
     players_per_group = None
     num_rounds = 1
-    yes_nko = dict(ego=.10, nko=.30)
-    no_nko = dict(ego=.20, nko=.0)
+
     precise_belief_payoff = 0.20  # for being in -5/5 margin of the average subsession belief
     circa_belief_payoff = 0.10  # for being in -10/10 margin of the average subession belief
     precise_margin = 5
@@ -35,14 +40,7 @@ class Constants(BaseConstants):
         cq3=2,
     )
     cq_label = 'Выберите истинное высказывание:'
-    donation_message = mark_safe(
-        "Получить бонус <b>10 центов</b> . В этом случае мы увеличим сумму пожертвований в фонд “Подари жизнь” на <b>30 центов</b>.")
-    CQ1_CHOICES = [
-        (1, 'Если я выберу “Получить бонус 10 центов”, я не получу своей оплаты за участие'),
-        (2, 'Если я выберу “Получить бонус 20 центов”, я не получу своей оплаты за участие'),
-        (3, 'Вне зависимости от моего решения я получу оплату за участие'),
 
-    ]
     CQ2_CHOICES = [
         (1, 'Я не смогу никак узнать действительно ли деньги были переведены в фонд “Подари Жизнь”.'),
         (2,
@@ -66,6 +64,15 @@ class Subsession(BaseSubsession):
     average_donation = models.FloatField()
     total_donation = models.FloatField()
 
+    @property
+    def donation_message(self):
+        yes_ego = to_cents(self.session.config.get('yes_ego'))
+        yes_nko = to_cents(self.session.config.get('yes_nko'))
+        return mark_safe(
+            f"Получить бонус <b>{yes_ego}</b> . "
+            f"В этом случае мы увеличим сумму пожертвований в фонд "
+            f"“Подари жизнь” на <b>{yes_nko}</b>.")
+
     def set_payoffs(self):
         ps = [p for p in self.get_players() if p.donation is not None]
         for p in ps:
@@ -78,6 +85,7 @@ class Subsession(BaseSubsession):
             p.set_belief_payoff()
             p.set_final_payoff()
             p.save()
+        logger.info(f'Payoffs for session {self.session.code} are set.')
 
 
 class Group(BaseGroup):
@@ -90,7 +98,19 @@ class Player(BasePlayer):
     direct_payoff = models.CurrencyField(initial=0)
     belief_payoff = models.CurrencyField(initial=0)
     belief = models.IntegerField(min=0, max=100)
-    cq1 = models.IntegerField(label=Constants.cq_label, choices=Constants.CQ1_CHOICES, widget=widgets.RadioSelect)
+    cq1 = models.IntegerField(label=Constants.cq_label, widget=widgets.RadioSelect)
+
+    def cq1_choices(self):
+        yes_ego = self.session.config.get('yes_ego')
+        no_ego = self.session.config.get('no_ego')
+        CQ1_CHOICES = [
+            (1, f'Если я выберу “Получить бонус {to_cents(yes_ego)}”, я не получу своей оплаты за участие'),
+            (2, f'Если я выберу “Получить бонус {to_cents(no_ego)}”, я не получу своей оплаты за участие'),
+            (3, 'Вне зависимости от моего решения я получу оплату за участие'),
+
+        ]
+        return CQ1_CHOICES
+
     cq2 = models.IntegerField(label=Constants.cq_label, choices=Constants.CQ2_CHOICES, widget=widgets.RadioSelect)
     cq3 = models.IntegerField(label=Constants.cq_label, choices=Constants.CQ3_CHOICES, widget=widgets.RadioSelect)
     cq_counter = models.IntegerField(initial=0)
@@ -99,21 +119,28 @@ class Player(BasePlayer):
     attention_agreement = models.BooleanField(widget=widgets.CheckboxInput)
 
     def donation_choices(self):
-        a = Constants.donation_message
+        a = self.subsession.donation_message
+        no_ego = to_cents(self.session.config.get('no_ego'))
+        no_nko_val = self.session.config.get('no_nko')
+        if not no_nko_val:
+            no_nko_str = "мы <b>НЕ</b> увеличим сумму пожертвований в фонд “Подари жизнь”"
+        else:
+            no_nko_str = f"мы увеличим сумму пожертвований в фонд “Подари жизнь” на <b>{to_cents(no_nko_val)}</b>"
         b = mark_safe(
-            "Получить бонус <b>20 центов</b>. В этом случае мы <b>НЕ</b> увеличим сумму пожертвований в фонд “Подари жизнь”.")
+            f"Получить бонус <b>{no_ego}</b>. В этом случае {no_nko_str}.")
         l = [(True, a), (False, b)]
         random.shuffle(l)
         return l
 
     def set_direct_payoff(self):
+        c = self.session.config
         if self.donation is not None:
             if self.donation:
-                self.direct_payoff = Constants.yes_nko.get('ego')
-                self.nko_payoff = Constants.yes_nko.get('nko')
+                self.direct_payoff = c.get('yes_ego')
+                self.nko_payoff = c.get('yes_nko')
             else:
-                self.direct_payoff = Constants.no_nko.get('ego')
-                self.nko_payoff = Constants.no_nko.get('nko')
+                self.direct_payoff = c.get('no_ego')
+                self.nko_payoff = c.get('no_nko')
 
     def set_belief_payoff(self):
         if abs(self.belief - self.subsession.average_donation) <= Constants.precise_margin:

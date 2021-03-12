@@ -5,6 +5,12 @@ dotenv.read_dotenv()
 TOLOKA_API = environ.get('TOLOKA_API')
 SANDBOX_TOLOKA_API = environ.get('SANDBOX_TOLOKA_API')
 
+some_defaults = dict(
+    yes_nko=0.30,
+    no_nko=0,
+    yes_ego=0,
+    no_ego=.20
+)
 SESSION_CONFIGS = [
 
     dict(
@@ -20,7 +26,8 @@ SESSION_CONFIGS = [
         app_sequence=[
             'singledonat',
             'endline'
-        ]
+        ],
+        **some_defaults
     ),
 ]
 

@@ -9,11 +9,12 @@
     <div class="card my-3">
         <div class="card-body">
             <div class="lead  text-center">
-                  Какая доля (от 0 до 100) оставшихся участников выбрала опцию: <br> <span class="font-italic">'({{ Constants.donation_message }}')</span> ?
+                Какая доля (от 0 до 100) оставшихся участников выбрала опцию: <br> <span
+                    class="font-italic">'({{ subsession.donation_message }}')</span> ?
 
             </div>
             <div>
-                {% formfield player.belief label=''%}
+                {% formfield player.belief label='' %}
             </div>
             <div>
                 Если вы угадаете эту долю (плюс-минус 5%), то вы получите дополнительный бонус <b>20 центов</b>
@@ -25,6 +26,6 @@
             </div>
         </div>
     </div>
-   <button class="btn btn-lg btn-danger">Принять решение</button>
+    <button class="btn btn-lg btn-danger">Принять решение</button>
 
 {% endblock %}
