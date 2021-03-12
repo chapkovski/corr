@@ -8,7 +8,7 @@ SANDBOX_TOLOKA_API = environ.get('SANDBOX_TOLOKA_API')
 some_defaults = dict(
     yes_nko=0.30,
     no_nko=0,
-    yes_ego=0,
+    yes_ego=0.10,
     no_ego=.20
 )
 SESSION_CONFIGS = [
