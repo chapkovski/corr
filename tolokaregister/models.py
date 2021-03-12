@@ -102,7 +102,8 @@ class UpdSession(Session):
             try:
                 i.accept_assignment()
             except UnAcceptedAnswer:
-                logger.warning(f'Participant {i.owner.code}; assignment id {i.assignment} is unacceptable; status: {i.status}; vars dump: {i.owner.vars} ')
+                logger.warning(f'Failure to accept. Participant {i.owner.code}; assignment id {i.assignment} is unacceptable; status: {i.status}; vars dump: {i.owner.vars} ')
+        logger.info(f'I finished accepting tasks for the session {self.code}')
 
 
 class UpdParticipant(Participant):
