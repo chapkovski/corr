@@ -96,7 +96,7 @@ class UpdSession(Session):
         records = self.get_or_update_info(request_linkage)
         submitted = [i for i in records if i.get('status') == StatusEnum.submitted]
         submitted_ids = [i.get('id') for i in submitted]
-        acceptable = TolokaParticipant.objects.filter(assignment__in=submitted_ids)
+        acceptable = [i for i in TolokaParticipant.objects.filter(assignment__in=submitted_ids) if i.acceptable]
         logger.info(f'I am planning to accept the following number of submissions: {acceptable.count()}')
         for i in acceptable:
             try:
