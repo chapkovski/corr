@@ -11,6 +11,7 @@ from otree.api import (
 import random
 from django.utils.html import mark_safe
 import logging
+
 logger = logging.getLogger(__name__)
 author = 'Philip Chapkovski, HSE-Moscow'
 
@@ -63,6 +64,10 @@ class Constants(BaseConstants):
 class Subsession(BaseSubsession):
     average_donation = models.FloatField()
     total_donation = models.FloatField()
+
+    def nko_codes(self):
+        ps = [p.participant.code for p in self.get_players() if p.donation]
+        return ' '.join(ps)
 
     @property
     def donation_message(self):
