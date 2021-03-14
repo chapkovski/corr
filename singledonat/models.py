@@ -122,6 +122,11 @@ class Player(BasePlayer):
     attention_counter = models.IntegerField(initial=0)
     attention = models.BooleanField()
     attention_agreement = models.BooleanField(widget=widgets.CheckboxInput)
+    useragent_is_mobile = models.BooleanField()
+    useragent_is_bot = models.BooleanField()
+    useragent_browser_family = models.StringField()
+    useragent_os_family = models.StringField()
+    useragent_device_family = models.StringField()
 
     def donation_choices(self):
         a = self.subsession.donation_message

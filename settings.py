@@ -58,4 +58,4 @@ DEMO_PAGE_INTRO_HTML = """ """
 SECRET_KEY = 't(zn5aln)w5)u+wj5wcqdj=0)z6lv%6#k1mg-r!&3kuec6vlb&'
 
 # if an app is included in SESSION_CONFIGS, you don't need to list it here
-INSTALLED_APPS = ['otree', 'tolokaregister']
+INSTALLED_APPS = ['otree', 'tolokaregister', 'django_user_agents', ]
