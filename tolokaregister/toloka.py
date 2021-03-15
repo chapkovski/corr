@@ -12,6 +12,11 @@ import requests
 from enum import Enum
 import logging
 
+
+class AssignmentDoesNotExist(Exception):
+    pass
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -75,9 +80,9 @@ class TolokaClient:
         return f"user-bonuses"
 
     def get_error_msg(self, resp):
-        return dict(error=True,
-                    error_status=resp.status_code,
-                    error_raw=resp.json())
+        return objdict(error=True,
+                       error_status=resp.status_code,
+                       error_raw=resp.json())
 
     def get_full_url(self, url):
         return f"{self.host}/api/v1/{url}"
@@ -105,7 +110,48 @@ class TolokaClient:
         """Using assginment id returns a toloka response object"""
         url = self.get_assignment_url(assignment_id)
         r = self.request_to_toloka(url)
+        if r.get('error'):
+            raise AssignmentDoesNotExist
         return TolokaResponse(**r)
+
+    def block_user_in_pool(self, user_id, pool_id, session_code):
+        payload = {
+            "scope": "POOL",
+            "user_id": user_id,
+            "pool_id": pool_id,
+            "private_comment": f'Blocking user in pool; session {session_code}',
+        }
+        url = 'user-restrictions'
+        method = 'PUT'
+        r = self.request_to_toloka(url, method=method, payload=payload)
+        logger.info(f'User is blocked. r={r}')
+        return r
+
+    def block_user_in_project(self, user_id, project_id, session_code):
+        payload = {
+            "scope": "PROJECT",
+            "user_id": user_id,
+            "project_id": project_id,
+            "private_comment": f'Blocking user in project {project_id}; session {session_code}',
+        }
+        url = 'user-restrictions'
+        method = 'PUT'
+        r = self.request_to_toloka(url, method=method, payload=payload)
+        logger.info(f'User is blocked. r={r}')
+        return r
+
+    def assign_skill(self, user_id, skill_id, value, reason):
+        payload = {
+            "skill_id": skill_id,
+            "user_id": user_id,
+            "value": value,
+            "reason": reason
+        }
+        url = 'user-skills'
+        method = 'PUT'
+        r = self.request_to_toloka(url, method=method, payload=payload)
+        logger.info(f'Skill (id: {skill_id} is assigned. r={r}')
+        return r
 
     def get_assignments(self, pool_id):
         """Using pool id returns all assignment objs"""

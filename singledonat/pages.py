@@ -6,6 +6,7 @@ from django.shortcuts import redirect
 from django_user_agents.utils import get_user_agent
 from .utils import set_tp
 
+
 class Intro(oTreePage):
     def get(self, *args, **kwargs):
         user_agent = get_user_agent(self.request)
@@ -14,9 +15,11 @@ class Intro(oTreePage):
         self.player.useragent_browser_family = user_agent.browser.family
         self.player.useragent_os_family = user_agent.os.family
         self.player.useragent_device_family = user_agent.device.family
-        if self.participant.label:
-            set_tp(self.participant.label, self.player)
         return super().get()
+
+    def before_next_page(self):
+        # if self.participant.label:
+        set_tp(self.participant.label, self.player)
 
 
 class AttentionCheck(oTreePage):
@@ -42,7 +45,12 @@ class NKOExplained(oTreePage):
 class AttentionFailed(Page):
 
     def is_displayed(self):
-        return not self.player.attention or self.player.cq_counter >= Constants.max_cq_errors
+        return not self.player.attention or self.player.cq_counter > Constants.max_cq_errors
+
+    def vars_for_template(self):
+        if not self.participant.vars.get('user_blocked'):
+            self.player.block_user()
+        return dict()
 
     def post(self):
         return redirect('https://toloka.yandex.ru/')
@@ -57,14 +65,12 @@ class CQ(Page):
     form_fields = ['cq1', 'cq2', 'cq3']
 
     def error_message(self, values):
-
-        if self.player.cq_counter >= Constants.max_cq_errors:
-            return
         for k, v in values.items():
             if v != Constants.correct_answers[k]:
                 self.player.cq_counter += 1
-                trials = Constants.max_cq_errors - self.player.cq_counter
-                return f'Пожалуйста, проверьте правильность ваших ответов! Вам осталось попыток: {trials}'
+                trials = Constants.max_cq_errors - self.player.cq_counter + 1
+                if self.player.cq_counter <= Constants.max_cq_errors:
+                    return f'Пожалуйста, проверьте правильность ваших ответов! Вам осталось попыток: {trials}'
 
 
 class BeforeDecision(Page):

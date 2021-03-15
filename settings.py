@@ -9,7 +9,9 @@ some_defaults = dict(
     yes_nko=0.30,
     no_nko=0,
     yes_ego=0.10,
-    no_ego=.20
+    no_ego=.20,
+    toloka_project_id=49048,
+    toloka_skill_id=25005,
 )
 SESSION_CONFIGS = [
 

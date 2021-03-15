@@ -12,6 +12,8 @@ import random
 from django.utils.html import mark_safe
 import logging
 
+from tolokaregister.toloka import TolokaClient, AssignmentDoesNotExist
+
 logger = logging.getLogger(__name__)
 author = 'Philip Chapkovski, HSE-Moscow'
 
@@ -99,12 +101,36 @@ class Group(BaseGroup):
 
 class Player(BasePlayer):
     toloka_user_id = models.StringField()
+    toloka_pool_id = models.StringField()
     donation = models.BooleanField()
     nko_payoff = models.CurrencyField(initial=0)
     direct_payoff = models.CurrencyField(initial=0)
     belief_payoff = models.CurrencyField(initial=0)
     belief = models.IntegerField(min=0, max=100)
     cq1 = models.IntegerField(label=Constants.cq_label, widget=widgets.RadioSelect)
+
+    def block_user(self):
+        project_id = self.session.config.get('toloka_project_id')
+        skill_id = self.session.config.get('toloka_skill_id', False)
+        if project_id and self.toloka_user_id and skill_id:
+            try:
+                sandbox = self.session.config.get('toloka_sandbox', False)
+                client = TolokaClient(sandbox=sandbox)
+                client.block_user_in_project(user_id=self.toloka_user_id, project_id=project_id,
+                                             session_code=self.session.code)
+
+                client.assign_skill(user_id=self.toloka_user_id,
+                                    skill_id=skill_id,
+                                    value=100,
+                                    reason='participated in corrreg'
+
+                                    )
+            except Exception as e:
+                logger.error(f'Failure to block user. {str(e)}')
+        else:
+            logger.warning(
+                f'participant {self.participant.code}; label {self.participant.label}: Failure to block user because project id or user id is not set')
+        self.participant.vars['user_blocked'] = True
 
     def cq1_choices(self):
         yes_ego = self.session.config.get('yes_ego')
