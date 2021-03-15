@@ -1,5 +1,5 @@
 from otree.api import Currency as c, currency_range
-from ._builtin import  WaitPage
+from ._builtin import WaitPage
 from .models import Constants
 from .generic_pages import Page, UniPage
 from django.shortcuts import redirect
@@ -44,10 +44,9 @@ class NKOExplained(UniPage):
 
 class AttentionFailed(UniPage):
     live_method = 'block_user'
+
     def is_displayed(self):
         return not self.player.attention or self.player.cq_counter > Constants.max_cq_errors
-
-
 
     def post(self):
         return redirect('https://toloka.yandex.ru/')
