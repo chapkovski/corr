@@ -1,12 +1,12 @@
 from otree.api import Currency as c, currency_range
-from ._builtin import Page as oTreePage, WaitPage
+from ._builtin import  WaitPage
 from .models import Constants
-from .generic_pages import Page
+from .generic_pages import Page, UniPage
 from django.shortcuts import redirect
 from django_user_agents.utils import get_user_agent
 
 
-class Intro(oTreePage):
+class Intro(UniPage):
     def get(self, *args, **kwargs):
         user_agent = get_user_agent(self.request)
         self.player.useragent_is_mobile = user_agent.is_mobile
@@ -17,12 +17,12 @@ class Intro(oTreePage):
         return super().get()
 
 
-class AttentionCheck(oTreePage):
+class AttentionCheck(UniPage):
     form_model = 'player'
     form_fields = ['attention_agreement', ]
 
 
-class NKOExplained(oTreePage):
+class NKOExplained(UniPage):
     form_model = 'player'
     form_fields = ['attention', ]
 
@@ -37,7 +37,7 @@ class NKOExplained(oTreePage):
             return ('Вы не прошли проверку на внимание. Вам осталась одна попытка')
 
 
-class AttentionFailed(Page):
+class AttentionFailed(UniPage):
 
     def is_displayed(self):
         return not self.player.attention or self.player.cq_counter >= Constants.max_cq_errors

@@ -1,9 +1,9 @@
 from otree.api import Currency as c, currency_range
-from ._builtin import Page, WaitPage
+from singledonat.generic_pages import UniPage
 from .models import Constants
 
 
-class SocialEconomic(Page):
+class SocialEconomic(UniPage):
     form_model = 'player'
     form_fields = [
         'age', 'gender', 'education', 'education1', 'occupation', 'birth', 'game',
@@ -14,14 +14,14 @@ class SocialEconomic(Page):
         self.player.set_acceptable_for_toloka()
 
 
-class Comments(Page):
+class Comments(UniPage):
     form_model = 'player'
     form_fields = [
         'general_comments',
     ]
 
 
-class Last(Page):
+class Last(UniPage):
     pass
 
 
