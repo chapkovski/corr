@@ -7,7 +7,17 @@ we should keep this page as simple as possible so that 'view source' is friendly
 i removed many linebreaks to make output HTML cleaner
 {% endcomment %}
 {% block body_main %}
+
+    {% if view.get_progress|default:False %}
+        {% block progress %}
+            {% include 'global/includes/progress.html' %}
+        {% endblock %}
+    {% endif %}
+
+
+
     <div class="otree-body container">
+
         <h2 class="otree-title page-header">{% block title %}{% endblock %}</h2>
         {% if view.remaining_timeout_seconds != None %}
             {% include 'otree/includes/TimeLimit.html' with form_element_id="form" %}
@@ -20,7 +30,8 @@ i removed many linebreaks to make output HTML cleaner
         {% endif %}{% if js_vars|default:False %}
         <script>var js_vars = {{ js_vars|json }};</script>{% endif %}
         <form class="otree-form" method="post" role="form" id="form" autocomplete="off">{% csrf_token %}
-            <div class="_otree-content">{% block content %}{% endblock %}</div>
+            <div class="_otree-content">
+                {% block content %}{% endblock %}</div>
         </form>
         <br/>
         {% block footer %}
