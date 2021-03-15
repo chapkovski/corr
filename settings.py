@@ -6,10 +6,10 @@ TOLOKA_API = environ.get('TOLOKA_API')
 SANDBOX_TOLOKA_API = environ.get('SANDBOX_TOLOKA_API')
 
 some_defaults = dict(
-    yes_nko=0.30,
+    yes_nko=0.50,
     no_nko=0,
     yes_ego=0.10,
-    no_ego=.20,
+    no_ego=.50,
     toloka_project_id=49048,
     toloka_skill_id=25005,
 )
