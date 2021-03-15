@@ -11,7 +11,7 @@ from otree.api import (
 import random
 from django.utils.html import mark_safe
 import logging
-
+from time import sleep
 from tolokaregister.toloka import TolokaClient, AssignmentDoesNotExist
 
 logger = logging.getLogger(__name__)
@@ -109,28 +109,31 @@ class Player(BasePlayer):
     belief = models.IntegerField(min=0, max=100)
     cq1 = models.IntegerField(label=Constants.cq_label, widget=widgets.RadioSelect)
 
-    def block_user(self):
-        project_id = self.session.config.get('toloka_project_id')
-        skill_id = self.session.config.get('toloka_skill_id', False)
-        if project_id and self.toloka_user_id and skill_id:
-            try:
-                sandbox = self.session.config.get('toloka_sandbox', False)
-                client = TolokaClient(sandbox=sandbox)
-                client.block_user_in_project(user_id=self.toloka_user_id, project_id=project_id,
-                                             session_code=self.session.code)
+    def block_user(self, data):
+        if not self.participant.vars.get('user_blocked'):
+            project_id = self.session.config.get('toloka_project_id')
+            skill_id = self.session.config.get('toloka_skill_id', False)
+            if project_id and self.toloka_user_id and skill_id:
+                try:
+                    sandbox = self.session.config.get('toloka_sandbox', False)
+                    client = TolokaClient(sandbox=sandbox)
+                    client.block_user_in_project(user_id=self.toloka_user_id, project_id=project_id,
+                                                 session_code=self.session.code)
 
-                client.assign_skill(user_id=self.toloka_user_id,
-                                    skill_id=skill_id,
-                                    value=100,
-                                    reason='participated in corrreg'
+                    client.assign_skill(user_id=self.toloka_user_id,
+                                        skill_id=skill_id,
+                                        value=100,
+                                        reason='participated in corrreg'
+                                        )
+                    self.participant.vars['user_blocked'] = True
+                except Exception as e:
+                    logger.error(f'Failure to block user. {str(e)}')
+            else:
+                logger.warning(
+                    f'participant {self.participant.code}; label {self.participant.label}: Failure to block user because project id or user id is not set')
 
-                                    )
-            except Exception as e:
-                logger.error(f'Failure to block user. {str(e)}')
         else:
-            logger.warning(
-                f'participant {self.participant.code}; label {self.participant.label}: Failure to block user because project id or user id is not set')
-        self.participant.vars['user_blocked'] = True
+            logger.warning(f'User {self.participant.code} has been already blocked')
 
     def cq1_choices(self):
         yes_ego = self.session.config.get('yes_ego')

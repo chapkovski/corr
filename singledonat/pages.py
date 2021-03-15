@@ -43,14 +43,11 @@ class NKOExplained(oTreePage):
 
 
 class AttentionFailed(Page):
-
+    live_method = 'block_user'
     def is_displayed(self):
         return not self.player.attention or self.player.cq_counter > Constants.max_cq_errors
 
-    def vars_for_template(self):
-        if not self.participant.vars.get('user_blocked'):
-            self.player.block_user()
-        return dict()
+
 
     def post(self):
         return redirect('https://toloka.yandex.ru/')
