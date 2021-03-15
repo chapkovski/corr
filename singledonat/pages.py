@@ -83,7 +83,7 @@ class Belief(Page):
     form_fields = ['belief']
 
 
-class NKOInfo(oTreePage):
+class NKOInfo(Page):
     pass
 
 
@@ -92,15 +92,15 @@ class EndlineAnnounced(Page):
 
 
 page_sequence = [
-    # Intro,
-    # AttentionCheck,
-    # NKOExplained,
-    # Instructions,
-    # CQ,
-    # BeforeDecision,
-    # Decision,
-    # BeliefExplained,
-    # Belief,
+    Intro,
+    AttentionCheck,
+    NKOExplained,
+    Instructions,
+    CQ,
+    BeforeDecision,
+    Decision,
+    BeliefExplained,
+    Belief,
     NKOInfo,
     EndlineAnnounced,
     AttentionFailed,

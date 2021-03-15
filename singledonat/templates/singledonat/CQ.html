@@ -35,9 +35,9 @@
 
     {% formfields %}
     <script>
-    $('#collapseExample').on('hidden.bs.collapse', function () {
+    $('#collapseExample').on('hide.bs.collapse', function () {
 $('#instbtn').html('Показать инструкции').addClass('btn-primary').removeClass('btn-warning')
-}).on('shown.bs.collapse', function(){$('#instbtn').html('Скрыть инструкции').addClass('btn-warning').removeClass('btn-primary')})
+}).on('show.bs.collapse', function(){$('#instbtn').html('Скрыть инструкции').addClass('btn-warning').removeClass('btn-primary')})
     </script>
     {% next_button %}
 
