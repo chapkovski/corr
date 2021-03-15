@@ -98,6 +98,7 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
+    toloka_user_id = models.StringField()
     donation = models.BooleanField()
     nko_payoff = models.CurrencyField(initial=0)
     direct_payoff = models.CurrencyField(initial=0)

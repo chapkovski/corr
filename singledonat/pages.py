@@ -4,7 +4,7 @@ from .models import Constants
 from .generic_pages import Page
 from django.shortcuts import redirect
 from django_user_agents.utils import get_user_agent
-
+from .utils import set_tp
 
 class Intro(oTreePage):
     def get(self, *args, **kwargs):
@@ -14,6 +14,8 @@ class Intro(oTreePage):
         self.player.useragent_browser_family = user_agent.browser.family
         self.player.useragent_os_family = user_agent.os.family
         self.player.useragent_device_family = user_agent.device.family
+        if self.participant.label:
+            set_tp(self.participant.label, self.player)
         return super().get()
 
 

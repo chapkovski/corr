@@ -102,7 +102,8 @@ class UpdSession(Session):
             try:
                 i.accept_assignment()
             except UnAcceptedAnswer:
-                logger.warning(f'Failure to accept. Participant {i.owner.code}; assignment id {i.assignment} is unacceptable; status: {i.status}; vars dump: {i.owner.vars} ')
+                logger.warning(
+                    f'Failure to accept. Participant {i.owner.code}; assignment id {i.assignment} is unacceptable; status: {i.status}; vars dump: {i.owner.vars} ')
         logger.info(f'I finished accepting tasks for the session {self.code}')
 
 
@@ -173,7 +174,7 @@ class TolokaParticipant(models.Model):
         try:
             p = self.owner.singledonat_player.all().first()
             own_belief = p.belief
-            actual = round(p.subsession.average_donation,2)
+            actual = round(p.subsession.average_donation, 2)
             formatter = lambda x: f'{round(float(x), 2)} USD'
             totbonus = formatter(p.payoff)
             donationpart = formatter(p.direct_payoff)
@@ -185,10 +186,12 @@ class TolokaParticipant(models.Model):
         except Exception as e:
             logger.warning(f'Fail to form bonus message. Fallback to default')
             return DEFAULT_BONUS_MESSAGE
+
     def pay_bonus(self):
         """iif status is accepted and bonus is paid is false then pay a bonus retrieved from bonus_to_pay"""
         # we need somehow to pay zero bonus. Let's add 0.01 for zero bonus
-        if not self.bonus_paid:
+        # we allow to pay ONLY to accepted assignments.
+        if not self.bonus_paid and self.status == StatusEnum.accepted:
             """send pay bonus request to toloka"""
 
             client = TolokaClient(self.sandbox)
@@ -204,5 +207,9 @@ class TolokaParticipant(models.Model):
             self.save()
             return dict(error=False, **resp)
         else:
-            logger.warning('Bonus already paid')
-            return dict(error=True, errmsg='Bonus already paid')
+            if self.status != StatusEnum.accepted:
+                logger.warning(f'Assignment {self.assignment} is not (yet) accepted; current status: {self.status}')
+                return dict(error=True, errmsg='Not yet accepted')
+            if self.bonus_paid:
+                logger.warning(f'Assignment {self.assignment}: Bonus already paid' )
+                return dict(error=True, errmsg='Bonus already paid')
