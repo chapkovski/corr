@@ -5,6 +5,7 @@ from .generic_pages import Page
 from django.shortcuts import redirect
 from django_user_agents.utils import get_user_agent
 
+
 class Intro(oTreePage):
     def get(self, *args, **kwargs):
         user_agent = get_user_agent(self.request)
@@ -82,20 +83,25 @@ class Belief(Page):
     form_fields = ['belief']
 
 
+class NKOInfo(oTreePage):
+    pass
+
+
 class EndlineAnnounced(Page):
     pass
 
 
 page_sequence = [
-    Intro,
-    AttentionCheck,
-    NKOExplained,
-    Instructions,
-    CQ,
-    BeforeDecision,
-    Decision,
-    BeliefExplained,
-    Belief,
+    # Intro,
+    # AttentionCheck,
+    # NKOExplained,
+    # Instructions,
+    # CQ,
+    # BeforeDecision,
+    # Decision,
+    # BeliefExplained,
+    # Belief,
+    NKOInfo,
     EndlineAnnounced,
     AttentionFailed,
 ]
