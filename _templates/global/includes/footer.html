@@ -1,13 +1,17 @@
 {% load otree i18n %}
 <style>
-      .footer p {font-size: smaller!important;}
+    .footer p {
+        font-size: smaller !important;
+    }
 </style>
 <div class="card my-3  footer">
     <div class="card-body">
-        <div class="media">
-           <img src="{% static 'global/img/hse_logo.jpg' %}" class="align-self-center  " alt="hse_logo"
-                 style="width: 200px; height:auto;">
-            <div class="media-body  ">
+        <div class="d-sm-flex flex-lg-row  flex-xs-column flex-sm-column">
+            <div class="media d-flex justify-content-center align-items-center">
+                <img src="{% static 'global/img/hse_logo.jpg' %}" class="align-self-center " alt="hse_logo"
+                     style="width: 200px; height:auto;">
+            </div>
+            <div class="media-body ">
 
 
                 <p>{% trans 'Это исследование проводится' %}
